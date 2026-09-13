@@ -3,72 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream</title>
+    <title>Our Crew Stream</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="player">
-        <h2 id="title">Loading...</h2>
-        <audio id="audio" src=""></audio>
-
-        <div class="buttons">
-            <button id="prev">⏮ Back</button>
-            <button id="play">▶ Play</button>
-            <button id="next">⏭ Next</button>
-        </div>
+    <div class="player-dashboard">
+        <h2 id="title">Select a Track to Play</h2>
+        
+        <!-- Visible player dashboard engine mapping metadata preloads -->
+        <audio id="audio-engine" controls preload="metadata"></audio>
         
         <ul id="list"></ul>
     </div>
 
     <script>
-        // PASTE YOUR LINKS FROM AUDIO.COM HERE
+        // Mapped locally to match your exact uploaded GitHub file asset string locations
         const tracks = [
-            { name: "Song One", url: "https://audio.com/nadeemely1/audio/diaf" },
-            { name: "Song Two", url: "https://audio.com/nadeemely1/audio/crimmels-stealing-all-the-air-official-audio" }
+            { name: "1. Crimmels - Stealing All The Air [Official Audio]", url: "Crimmels - stealing all the air [official audio].mp3" },
+            { name: "2. DIAF", url: "DIAF.mp3" },
+            { name: "3. M.I.A. - [Official Diss Track]", url: "M.I.A. - [official diss track].mp3" },
+            { name: "4. M.I.A. 2 (Official Diss Track)", url: "M.I.A. 2 (official diss track).mp3" },
+            { name: "5. New Diss Lil Rupee", url: "new diss lil rupee.mp3" },
+            { name: "6. Scammer Boy - Disstrack", url: "scammer boy - disstrack.mp3" },
+            { name: "7. Special Mentioned (Audio Track 1)", url: "special mentioned (audio track1).mp3" },
+            { name: "8. Youngnelly - All Around Diss [Audio]", url: "youngnelly - all around diss [audio].mp3" },
+            { name: "9. Youngnelly ft. BBD (Official Diss)", url: "youngnelly ft. BBD (official diss).mp3" }
         ];
 
-        let current = 0;
-        const audio = document.getElementById('audio');
-        const playBtn = document.getElementById('play');
-        const title = document.getElementById('title');
-        const list = document.getElementById('list');
+        let currentTrackIndex = 0;
+        const audioEngine = document.getElementById('audio-engine');
+        const songTitle = document.getElementById('title');
+        const playlistUI = document.getElementById('list');
 
-        function setupTrack(index) {
-            current = index;
-            audio.src = tracks[index].url;
-            title.textContent = tracks[index].name;
-            
-            // Rebuild the song list highlights
-            list.innerHTML = "";
+        function loadSong(index) {
+            currentTrackIndex = index;
+            // Uses localized system linking without external domains to bypass cross-origin browser freezes
+            audioEngine.src = tracks[index].url;
+            audioEngine.load(); 
+            songTitle.textContent = tracks[index].name;
+
+            // Rebuild selection highlighting markers
+            playlistUI.innerHTML = "";
             tracks.forEach((track, i) => {
                 const item = document.createElement('li');
                 item.textContent = track.name;
-                if (i === current) item.style.color = "#1db954";
-                item.onclick = () => { setupTrack(i); audio.play(); playBtn.textContent = "⏸ Pause"; };
-                list.appendChild(item);
+                
+                if (i === currentTrackIndex) {
+                    item.classList.add('active-song');
+                }
+                
+                item.onclick = () => { 
+                    loadSong(i); 
+                    // Safely triggers the browser audio node after connection pathways clear
+                    setTimeout(() => {
+                        audioEngine.play().catch(err => console.log("System initialized.", err));
+                    }, 50);
+                };
+                playlistUI.appendChild(item);
             });
         }
 
-        playBtn.onclick = () => {
-            if (audio.paused) { audio.play(); playBtn.textContent = "⏸ Pause"; }
-            else { audio.pause(); playBtn.textContent = "▶ Play"; }
+        // Automatic consecutive track sequencing loop
+        audioEngine.onended = () => {
+            currentTrackIndex++;
+            if (currentTrackIndex >= tracks.length) currentTrackIndex = 0;
+            loadSong(currentTrackIndex);
+            setTimeout(() => { audioEngine.play(); }, 50);
         };
-
-        document.getElementById('next').onclick = () => {
-            let next = current + 1;
-            if (next >= tracks.length) next = 0;
-            setupTrack(next); audio.play(); playBtn.textContent = "⏸ Pause";
-        };
-
-        document.getElementById('prev').onclick = () => {
-            let prev = current - 1;
-            if (prev < 0) prev = tracks.length - 1;
-            setupTrack(prev); audio.play(); playBtn.textContent = "⏸ Pause";
-        };
-
-        audio.onended = () => { document.getElementById('next').click(); };
-        setupTrack(current);
+        
+        loadSong(currentTrackIndex);
     </script>
 </body>
 </html>

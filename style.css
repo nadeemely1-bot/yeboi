@@ -1,0 +1,36 @@
+body {
+    background: #121212;
+    color: white;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.player {
+    background: #1e1e1e;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+}
+button {
+    background: #1db954;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+ul {
+    text-align: left;
+    list-style: none;
+    padding: 0;
+}
+li {
+    padding: 10px 0;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+}

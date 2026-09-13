@@ -8,7 +8,7 @@
 </head>
 <body>
 
-    <!-- NEW: Double-buffered overlay crossfade background framework elements -->
+    <!-- Fullscreen background crossfader layers -->
     <div id="bg-master" class="bg-wrapper">
         <div id="bg-layer-1" class="bg-layer active-view"></div>
         <div id="bg-layer-2" class="bg-layer"></div>
@@ -16,25 +16,39 @@
 
     <div class="player-dashboard">
         <h2 id="title">Select a Track to Play</h2>
-        <audio id="audio-engine" controls preload="metadata"></audio>
-        <ul id="list"></ul>
+        
+        <div class="dashboard-contents">
+            <!-- Left Side: Player Engine & Tracks -->
+            <div class="player-left-panel">
+                <audio id="audio-engine" controls preload="metadata"></audio>
+                <ul id="list"></ul>
+            </div>
+
+            <!-- Right Side: Double-Buffered Cover Art Box Window -->
+            <div id="art-box" class="art-right-panel">
+                <div id="cover-layer-1" class="cover-layer active-view"></div>
+                <div id="cover-layer-2" class="cover-layer"></div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Mapped exactly to your provided song list and custom artwork filenames
         const tracks = [
-            { name: "1. Crimmels - Stealing All The Air [Official Audio]", url: "Crimmels - stealing all the air [official audio].mp3", img: "bg1.jpg", color: "#0f172a" }, 
-            { name: "2. DIAF", url: "DIAF.mp3", img: "bg2.jpg", color: "#450a0a" }, 
-            { name: "3. M.I.A. - [Official Diss Track]", url: "M.I.A. - [official diss track].mp3", img: "bg3.jpg", color: "#1e1b4b" }, 
-            { name: "4. M.I.A. 2 (Official Diss Track)", url: "M.I.A. 2 (official diss track).mp3", img: "bg4.jpg", color: "#2e1065" }, 
-            { name: "5. New Diss Lil Rupee", url: "new diss lil rupee.mp3", img: "bg5.jpg", color: "#022c22" }, 
-            { name: "6. Scammer Boy - Disstrack", url: "scammer boy - disstrack.mp3", img: "bg6.jpg", color: "#431407" }, 
-            { name: "7. Special Mentioned (Audio Track 1)", url: "special mentioned (audio track1).mp3", img: "bg7.jpg", color: "#0f172a" }, 
-            { name: "8. Youngnelly - All Around Diss [Audio]", url: "youngnelly - all around diss [audio].mp3", img: "bg8.jpg", color: "#3b0764" }, 
-            { name: "9. Youngnelly ft. BBD (Official Diss)", url: "youngnelly ft. BBD (official diss).mp3", img: "bg9.jpg", color: "#042f2e" }
+            { name: "1. Crimmels - Stealing All The Air [Official Audio]", url: "Crimmels - stealing all the air [official audio].mp3", img: "Crimmels - stealing all the air [official audio].png", cover: "Crimmels - stealing all the air [official audio].png", color: "#1e293b" }, 
+            { name: "2. DIAF", url: "DIAF.mp3", img: "DIAF.jpg", cover: "DIAF.jpg", color: "#450a0a" }, 
+            { name: "3. M.I.A. - [Official Diss Track]", url: "M.I.A. - [official diss track].mp3", img: "M.I.A. - [official diss track].jpg", cover: "M.I.A. - [official diss track].jpg", color: "#1e1b4b" }, 
+            { name: "4. M.I.A. 2 (Official Diss Track)", url: "M.I.A. 2 (official diss track).mp3", img: "M.I.A. 2 (Official Diss Track).jpg", cover: "M.I.A. 2 (Official Diss Track).jpg", color: "#2e1065" }, 
+            { name: "5. New Diss Lil Rupee", url: "new diss lil rupee.mp3", img: "new diss lil rupee.png", cover: "new diss lil rupee.png", color: "#022c22" }, 
+            { name: "6. Scammer Boy - Disstrack", url: "scammer boy - disstrack.mp3", img: "scammer boy - disstrack.jpg", cover: "scammer boy - disstrack.jpg", color: "#431407" }, 
+            { name: "7. Special Mentioned (Audio Track 1)", url: "special mentioned (audio track1).mp3", img: "special mentioned (audio track1).jpg", cover: "special mentioned (audio track1).jpg", color: "#0f172a" }, 
+            { name: "8. Youngnelly - All Around Diss [Audio]", url: "youngnelly - all around diss [audio].mp3", img: "youngnelly - all around diss [audio].png", cover: "youngnelly - all around diss [audio].png", color: "#3b0764" }, 
+            { name: "9. Youngnelly ft. BBD (Official Diss)", url: "youngnelly ft. BBD (official diss).mp3", img: "youngnelly ft. BBD (official diss).jpg", cover: "youngnelly ft. BBD (official diss).jpg", color: "#042f2e" }
         ];
 
         let currentTrackIndex = 0;
-        let activeLayerToggle = 1; // Flips between 1 and 2 to crossfade layer assets smoothly
+        let activeLayerToggle = 1; 
+        let activeCoverToggle = 1; 
 
         const audioEngine = document.getElementById('audio-engine');
         const songTitle = document.getElementById('title');
@@ -44,34 +58,44 @@
         const layer1 = document.getElementById('bg-layer-1');
         const layer2 = document.getElementById('bg-layer-2');
 
+        const artBox = document.getElementById('art-box');
+        const cover1 = document.getElementById('cover-layer-1');
+        const cover2 = document.getElementById('cover-layer-2');
+
         function loadSong(index) {
             currentTrackIndex = index;
             audioEngine.src = tracks[index].url;
             audioEngine.load(); 
             songTitle.textContent = tracks[index].name;
 
-            // NEW: The Dual-Layer Transition Crossfade Logic Engine
+            // Dual-Layer Background Crossfader Logic
             const currentActiveLayer = (activeLayerToggle === 1) ? layer1 : layer2;
             const nextActiveLayer = (activeLayerToggle === 1) ? layer2 : layer1;
 
-            // 1. Queue up the next graphic image layout, set it at the transparent bottom floor entry line
-            nextActiveLayer.src = ""; // Clear file target node
             nextActiveLayer.style.backgroundImage = `url('${tracks[index].img}')`;
             nextActiveLayer.className = "bg-layer incoming-view"; 
 
-            // 2. Trigger a tiny 20ms browser rendering timeout window to force structural execution smoothly
+            // Dual-Layer Cover Art Crossfader Logic
+            const currentActiveCover = (activeCoverToggle === 1) ? cover1 : cover2;
+            const nextActiveCover = (activeCoverToggle === 1) ? cover2 : cover1;
+
+            nextActiveCover.style.backgroundImage = `url('${tracks[index].cover}')`;
+            nextActiveCover.className = "cover-layer incoming-view";
+
             setTimeout(() => {
-                // Shift ambient color floor vibe
+                // Update Ambient Colors & Box Shadows
                 bgMaster.style.backgroundColor = tracks[index].color;
+                artBox.style.boxShadow = `0 8px 30px ${tracks[index].color}80, 0 4px 12px rgba(0,0,0,0.5)`;
                 
-                // Elevate and fade in the incoming plate node
+                // Trigger transitions simultaneously
                 nextActiveLayer.className = "bg-layer active-view";
-                
-                // Fade away the old plate background node cleanly behind it
                 currentActiveLayer.className = "bg-layer";
                 
-                // Flip the binary switch variable state handler
+                nextActiveCover.className = "cover-layer active-view";
+                currentActiveCover.className = "cover-layer";
+                
                 activeLayerToggle = (activeLayerToggle === 1) ? 2 : 1;
+                activeCoverToggle = (activeCoverToggle === 1) ? 2 : 1;
             }, 20);
 
             playlistUI.innerHTML = "";
